@@ -1,0 +1,93 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cookie Body -->
+  <circle cx="200" cy="200" r="120" fill="#D2B48C" stroke="#8B4513" stroke-width="6"/>
+
+  <!-- Cookie Chips -->
+  <circle cx="160" cy="140" r="12" fill="#8B4513"/>
+  <circle cx="220" cy="130" r="10" fill="#8B4513"/>
+  <circle cx="260" cy="160" r="8" fill="#8B4513"/>
+  <circle cx="140" cy="180" r="10" fill="#8B4513"/>
+  <circle cx="250" cy="200" r="12" fill="#8B4513"/>
+  <circle cx="170" cy="240" r="8" fill="#8B4513"/>
+  <circle cx="230" cy="250" r="10" fill="#8B4513"/>
+  <circle cx="280" cy="220" r="8" fill="#8B4513"/>
+  <circle cx="120" cy="220" r="8" fill="#8B4513"/>
+  <circle cx="200" cy="280" r="10" fill="#8B4513"/>
+
+  <!-- Sunglasses -->
+  <g>
+    <!-- Frame -->
+    <rect x="130" y="165" width="140" height="45" rx="22" fill="#2C1810"/>
+    <!-- Left lens -->
+    <rect x="145" y="175" width="45" height="25" rx="12" fill="#1A1A1A"/>
+    <!-- Right lens -->
+    <rect x="210" y="175" width="45" height="25" rx="12" fill="#1A1A1A"/>
+    <!-- Bridge -->
+    <rect x="190" y="182" width="20" height="12" rx="6" fill="#2C1810"/>
+    <!-- Pixel reflections on lenses -->
+    <rect x="150" y="180" width="8" height="4" fill="white" opacity="0.8"/>
+    <rect x="160" y="180" width="8" height="4" fill="white" opacity="0.8"/>
+    <rect x="170" y="180" width="8" height="4" fill="white" opacity="0.8"/>
+    <rect x="180" y="180" width="8" height="4" fill="white" opacity="0.8"/>
+    <rect x="215" y="180" width="8" height="4" fill="white" opacity="0.8"/>
+    <rect x="225" y="180" width="8" height="4" fill="white" opacity="0.8"/>
+    <rect x="235" y="180" width="8" height="4" fill="white" opacity="0.8"/>
+    <rect x="245" y="180" width="8" height="4" fill="white" opacity="0.8"/>
+
+    <rect x="150" y="190" width="8" height="4" fill="white" opacity="0.6"/>
+    <rect x="170" y="190" width="8" height="4" fill="white" opacity="0.6"/>
+    <rect x="215" y="190" width="8" height="4" fill="white" opacity="0.6"/>
+    <rect x="235" y="190" width="8" height="4" fill="white" opacity="0.6"/>
+  </g>
+
+  <!-- Mouth -->
+  <ellipse cx="200" cy="240" rx="30" ry="25" fill="#2C1810"/>
+
+  <!-- Tongue -->
+  <ellipse cx="200" cy="245" rx="18" ry="15" fill="#FF69B4"/>
+
+  <!-- Left Arm (waving) -->
+  <g transform="translate(110, 210)">
+    <ellipse cx="0" cy="0" rx="18" ry="35" fill="#2C1810" transform="rotate(-45)"/>
+    <!-- Hand -->
+    <g transform="translate(-25, -20) rotate(-45)">
+      <circle cx="0" cy="0" r="15" fill="#2C1810"/>
+      <!-- Fingers -->
+      <ellipse cx="-10" cy="-10" rx="5" ry="10" fill="#2C1810" transform="rotate(-25)"/>
+      <ellipse cx="-3" cy="-15" rx="5" ry="10" fill="#2C1810"/>
+      <ellipse cx="7" cy="-12" rx="5" ry="10" fill="#2C1810" transform="rotate(25)"/>
+      <ellipse cx="12" cy="-5" rx="5" ry="8" fill="#2C1810" transform="rotate(45)"/>
+    </g>
+  </g>
+
+  <!-- Right Arm -->
+  <g transform="translate(290, 210)">
+    <ellipse cx="0" cy="0" rx="18" ry="35" fill="#2C1810" transform="rotate(45)"/>
+    <!-- Hand -->
+    <g transform="translate(25, -20) rotate(45)">
+      <circle cx="0" cy="0" r="15" fill="#2C1810"/>
+      <!-- Fingers -->
+      <ellipse cx="10" cy="-10" rx="5" ry="10" fill="#2C1810" transform="rotate(25)"/>
+      <ellipse cx="3" cy="-15" rx="5" ry="10" fill="#2C1810"/>
+      <ellipse cx="-7" cy="-12" rx="5" ry="10" fill="#2C1810" transform="rotate(-25)"/>
+      <ellipse cx="-12" cy="-5" rx="5" ry="8" fill="#2C1810" transform="rotate(-45)"/>
+    </g>
+  </g>
+
+  <!-- Left Leg -->
+  <g transform="translate(160, 300)">
+    <ellipse cx="0" cy="0" rx="15" ry="30" fill="#2C1810" transform="rotate(-20)"/>
+    <!-- Foot -->
+    <ellipse cx="-10" cy="25" rx="18" ry="10" fill="#2C1810" transform="rotate(-20)"/>
+  </g>
+
+  <!-- Right Leg -->
+  <g transform="translate(240, 300)">
+    <ellipse cx="0" cy="0" rx="15" ry="30" fill="#2C1810" transform="rotate(20)"/>
+    <!-- Foot -->
+    <ellipse cx="10" cy="25" rx="18" ry="10" fill="#2C1810" transform="rotate(20)"/>
+  </g>
+
+  <!-- Shadow -->
+  <ellipse cx="200" cy="380" rx="100" ry="20" fill="#000000" opacity="0.2"/>
+</svg>

@@ -1,0 +1,257 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write access to memes
+    match /memes/{memeId} {
+      // Anyone can read memes
+      allow read: if true;
+
+      // Only authenticated users can create memes
+      allow create: if request.auth != null;
+
+      // Only the author can update/delete their memes, or admins
+      allow update, delete: if request.auth != null && 
+        (request.auth.uid == resource.data.authorId || 
+         request.auth.uid in get(/databases/$(database)/documents/admins/adminList).data.adminIds);
+    }
+
+    // Allow read/write access to users
+    match /users/{userId} {
+      // Anyone can read user profiles
+      allow read: if true;
+
+      // Users can only create/update their own profile
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+
+      // No deletes allowed for user profiles
+      allow delete: if false;
+    }
+
+    // Allow read/write access to user XP
+    match /userXP/{userId} {
+      // Anyone can read XP data
+      allow read: if true;
+
+      // Only authenticated users can update XP
+      allow create, update: if request.auth != null;
+
+      // No deletes allowed for XP data
+      allow delete: if false;
+    }
+
+    // Allow read/write access to user achievements
+    match /userAchievements/{userId} {
+      // Anyone can read achievements
+      allow read: if true;
+
+      // Only authenticated users can update achievements
+      allow create, update: if request.auth != null;
+
+      // No deletes allowed for achievements
+      allow delete: if false;
+    }
+
+    // Allow read/write access to hashtags
+    match /hashtags/{hashtagId} {
+      // Anyone can read hashtags
+      allow read: if true;
+
+      // Only authenticated users can create/update hashtags
+      allow create, update: if request.auth != null;
+
+      // No deletes allowed for hashtags
+      allow delete: if false;
+    }
+
+    // Allow read/write access to trending hashtags
+    match /trendingHashtags/{trendingId} {
+      // Anyone can read trending hashtags
+      allow read: if true;
+
+      // Only authenticated users can update trending hashtags
+      allow create, update: if request.auth != null;
+
+      // No deletes allowed
+      allow delete: if false;
+    }
+
+    // Allow read/write access to admin actions log
+    match /adminActions/{actionId} {
+      // Only authenticated users can read admin actions
+      allow read: if request.auth != null;
+
+      // Only authenticated users can create admin actions
+      allow create: if request.auth != null;
+
+      // No updates or deletes allowed for audit trail
+      allow update, delete: if false;
+    }
+
+    // Allow read/write access to follows
+    match /follows/{followId} {
+      // Anyone can read follow relationships
+      allow read: if true;
+
+      // Only authenticated users can create/delete follows
+      allow create, delete: if request.auth != null;
+
+      // No updates allowed
+      allow update: if false;
+    }
+
+    // Allow read/write access to follow stats
+    match /followStats/{userId} {
+      // Anyone can read follow stats
+      allow read: if true;
+
+      // Only authenticated users can update stats
+      allow create, update: if request.auth != null;
+
+      // No deletes allowed
+      allow delete: if false;
+    }
+
+    // Allow read/write access to notifications
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // Only authenticated users can create notifications
+      allow create: if request.auth != null;
+
+      // Users can only update their own notifications (mark as read)
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // Users can only delete their own notifications
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Allow read/write access to user interactions
+    match /userInteractions/{interactionId} {
+      // Users can read any interaction (for public like counts, etc.)
+      allow read: if true;
+
+      // Users can only create/update/delete their own interactions
+      allow create, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Allow read/write access to comment replies
+    match /commentReplies/{replyId} {
+      // Anyone can read replies
+      allow read: if true;
+
+      // Only authenticated users can create replies
+      allow create: if request.auth != null;
+
+      // Users can only update/delete their own replies, or post author, or admins
+      allow update, delete: if request.auth != null && 
+        (request.auth.uid == resource.data.userId || 
+         request.auth.uid in get(/databases/$(database)/documents/admins/adminList).data.adminIds);
+    }
+
+    // Allow read/write access to monthly top performers
+    match /monthlyTopPerformers/{monthId} {
+      // Anyone can read top performers
+      allow read: if true;
+
+      // Only authenticated users can create/update
+      allow create, update: if request.auth != null;
+
+      // No deletes allowed
+      allow delete: if false;
+    }
+
+    // Allow read/write access to chat rooms
+    match /chatRooms/{chatId} {
+      // Users can only read chats they are part of
+      allow read: if request.auth != null && 
+        (request.auth.uid in resource.data.participants || 
+         request.auth.uid == resource.data.createdBy);
+
+      // Only authenticated users can create chat rooms
+      allow create: if request.auth != null;
+
+      // Only participants can update chat rooms
+      allow update: if request.auth != null && 
+        (request.auth.uid in resource.data.participants || 
+         request.auth.uid == resource.data.createdBy);
+
+      // Only creator can delete chat rooms
+      allow delete: if request.auth != null && request.auth.uid == resource.data.createdBy;
+    }
+
+    // Allow read/write access to chat messages
+    match /chatMessages/{messageId} {
+      // Users can only read messages from chats they are part of
+      allow read: if request.auth != null;
+
+      // Only authenticated users can create messages
+      allow create: if request.auth != null;
+
+      // Users can only update/delete their own messages
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.senderId;
+    }
+
+    // Allow read/write access to meme views
+    match /memeViews/{viewId} {
+      // Anyone can read view counts
+      allow read: if true;
+
+      // Only authenticated users can create views
+      allow create: if request.auth != null;
+
+      // No updates or deletes allowed
+      allow update, delete: if false;
+    }
+
+    // Allow read/write access to view stats
+    match /viewStats/{memeId} {
+      // Anyone can read view stats
+      allow read: if true;
+
+      // Only authenticated users can update view stats
+      allow create, update: if request.auth != null;
+
+      // No deletes allowed
+      allow delete: if false;
+    }
+
+    // Allow read/write access to badge explanations
+    match /badgeExplanations/{badgeId} {
+      // Anyone can read badge explanations
+      allow read: if true;
+
+      // Only authenticated users can create/update badge explanations
+      allow create, update: if request.auth != null;
+
+      // No deletes allowed
+      allow delete: if false;
+    }
+
+    // Allow read/write access to leaderboards
+    match /leaderboards/{leaderboardId} {
+      // Anyone can read leaderboards
+      allow read: if true;
+
+      // Only authenticated users can create/update leaderboards
+      allow create, update: if request.auth != null;
+
+      // No deletes allowed
+      allow delete: if false;
+    }
+
+    // Allow read/write access to admins list
+    match /admins/{adminDoc} {
+      // Only authenticated users can read admin list
+      allow read: if request.auth != null;
+
+      // Only existing admins can update admin list
+      allow create, update: if request.auth != null && 
+        request.auth.uid in resource.data.adminIds;
+
+      // No deletes allowed
+      allow delete: if false;
+    }
+  }
+}

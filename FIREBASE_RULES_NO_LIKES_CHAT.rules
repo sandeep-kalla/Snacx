@@ -1,0 +1,244 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+    
+    // Helper function to check if user is the meme author
+    function isMemeAuthor(memeId) {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/memes/$(memeId)) &&
+             get(/databases/$(database)/documents/memes/$(memeId)).data.authorId == request.auth.uid;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // ===== CORE USER & CONTENT COLLECTIONS =====
+    
+    // User Profiles Collection
+    match /userProfiles/{userId} {
+      allow read: if true;
+      allow create, update: if isOwner(userId);
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // Memes Collection - NO LIKES
+    match /memes/{memeId} {
+      allow read: if true;
+      allow create: if request.auth != null && isOwner(request.resource.data.authorId);
+      allow update: if request.auth != null && 
+        (isOwner(resource.data.authorId) || isAdmin());
+      allow delete: if request.auth != null && 
+        (isOwner(resource.data.authorId) || isAdmin());
+      allow list: if true;
+    }
+    
+    // Comment Replies Collection
+    match /commentReplies/{replyId} {
+      allow read: if true;
+      allow create: if request.auth != null && isOwner(request.resource.data.userId);
+      allow update: if request.auth != null && isOwner(resource.data.userId);
+      allow delete: if request.auth != null && 
+        (isOwner(resource.data.userId) || 
+         isAdmin() ||
+         isMemeAuthor(resource.data.memeId));
+      allow list: if true;
+    }
+    
+    // ===== XP & ACHIEVEMENT SYSTEM =====
+    
+    // User XP Collection
+    match /userXP/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // XP Transactions Collection
+    match /xpTransactions/{transactionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin();
+      allow list: if request.auth != null;
+    }
+    
+    // User Achievements Collection
+    match /userAchievements/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // Achievement Progress Collection
+    match /achievementProgress/{userId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if request.auth != null;
+    }
+    
+    // ===== SOCIAL FEATURES =====
+    
+    // Follows Collection
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if request.auth != null && isOwner(request.resource.data.followerId);
+      allow delete: if request.auth != null && 
+        (isOwner(resource.data.followerId) || isAdmin());
+      allow update: if false;
+      allow list: if true;
+    }
+    
+    // Follow Stats Collection
+    match /followStats/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && 
+        (isOwner(resource.data.userId) || isAdmin());
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && 
+        (isOwner(resource.data.userId) || isAdmin());
+      allow delete: if request.auth != null && 
+        (isOwner(resource.data.userId) || isAdmin());
+      allow list: if request.auth != null;
+    }
+    
+    // User Interactions Collection (bookmarks only - NO LIKES)
+    match /userInteractions/{interactionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow delete: if request.auth != null;
+      allow update: if request.auth != null;
+      allow list: if request.auth != null;
+    }
+    
+    // ===== CONTENT MANAGEMENT =====
+    
+    // Hashtags Collection
+    match /hashtags/{hashtagId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // Meme Hashtags Collection
+    match /memeHashtags/{memeHashtagId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if request.auth != null;
+      allow list: if true;
+    }
+    
+    // Content Counts Collection
+    match /contentCounts/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // ===== ANALYTICS & TRACKING =====
+    
+    // Meme Views Collection
+    match /memeViews/{viewId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // View Stats Collection
+    match /viewStats/{statsId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // ===== LEADERBOARDS & RANKINGS =====
+    
+    // Leaderboards Collection
+    match /leaderboards/{leaderboardId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // Monthly Leaderboards Collection
+    match /monthlyLeaderboards/{monthId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // ===== SYSTEM & ADMIN =====
+    
+    // Badge Explanations Collection
+    match /badgeExplanations/{badgeId} {
+      allow read: if true;
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // Admin Users Collection
+    match /adminUsers/{userId} {
+      allow read: if request.auth != null;
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+      allow list: if request.auth != null;
+    }
+    
+    // Admin Actions Collection
+    match /adminActions/{actionId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+      allow list: if isAdmin();
+    }
+    
+    // Admins Collection
+    match /admins/{adminDoc} {
+      allow read: if request.auth != null;
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+      allow list: if request.auth != null;
+    }
+    
+    // System Configuration Collection
+    match /systemConfig/{configId} {
+      allow read: if true;
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+    
+    // App Statistics Collection
+    match /appStats/{statsId} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin();
+      allow list: if true;
+    }
+  }
+}
