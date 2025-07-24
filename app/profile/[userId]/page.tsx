@@ -47,20 +47,29 @@ export default function ProfilePage() {
   const [realTimeStats, setRealTimeStats] = useState({
     totalLikes: 0,
     totalComments: 0,
-    totalViews: 0
+    totalViews: 0,
   });
   const [followStats, setFollowStats] = useState({
     followersCount: 0,
-    followingCount: 0
+    followingCount: 0,
   });
 
+  // Move loadFollowStats outside useEffect so it's accessible everywhere
+  const loadFollowStats = async () => {
+    try {
+      const stats = await FollowService.getFollowStats(userId);
+      setFollowStats(stats);
+    } catch (error) {
+      console.error("Error loading follow stats:", error);
+    }
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const [userProfile, xpData] = await Promise.all([
           UserService.getUserProfile(userId),
-          XPService.getUserXP(userId)
+          XPService.getUserXP(userId),
         ]);
         setProfile(userProfile);
         setUserXP(xpData);
@@ -80,9 +89,9 @@ export default function ProfilePage() {
         );
 
         const querySnapshot = await getDocs(q);
-        const memesData = querySnapshot.docs.map(doc => ({
+        const memesData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         })) as Meme[];
 
         // Sort client-side by creation date (newest first)
@@ -102,19 +111,10 @@ export default function ProfilePage() {
         setRealTimeStats({
           totalLikes: stats.totalLikes,
           totalComments: stats.totalComments,
-          totalViews: profile?.stats.totalViews || 0 // Keep using stored views for now
+          totalViews: profile?.stats.totalViews || 0, // Keep using stored views for now
         });
       } catch (error) {
         console.error("Error loading real-time stats:", error);
-      }
-    };
-
-    const loadFollowStats = async () => {
-      try {
-        const stats = await FollowService.getFollowStats(userId);
-        setFollowStats(stats);
-      } catch (error) {
-        console.error("Error loading follow stats:", error);
       }
     };
 
@@ -125,8 +125,6 @@ export default function ProfilePage() {
       loadFollowStats();
     }
   }, [userId, profile?.stats.totalViews]);
-
-
 
   const isOwnProfile = user?.uid === userId;
 
@@ -146,8 +144,12 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-text-primary mb-2">Profile Not Found</h1>
-          <p className="text-text-secondary">This user profile doesn't exist.</p>
+          <h1 className="text-2xl font-bold text-text-primary mb-2">
+            Profile Not Found
+          </h1>
+          <p className="text-text-secondary">
+            This user profile doesn't exist.
+          </p>
         </div>
       </div>
     );
@@ -169,7 +171,7 @@ export default function ProfilePage() {
           <div className="flex items-start space-x-6">
             {/* Avatar */}
             <div className="w-24 h-24 bg-primary/10 rounded-full border-4 border-primary/20 flex items-center justify-center overflow-hidden">
-              {profile.avatar.startsWith('http') ? (
+              {profile.avatar.startsWith("http") ? (
                 <img
                   src={profile.avatar}
                   alt="Profile avatar"
@@ -177,7 +179,7 @@ export default function ProfilePage() {
                 />
               ) : (
                 <span className="text-5xl">
-                  {getAvatarById(profile.avatar)?.url || '🐱'}
+                  {getAvatarById(profile.avatar)?.url || "🐱"}
                 </span>
               )}
             </div>
@@ -206,7 +208,7 @@ export default function ProfilePage() {
                   </>
                 )}
               </div>
-              
+
               {profile.bio && (
                 <p className="text-text-secondary mb-4 max-w-2xl">
                   {profile.bio}
@@ -231,37 +233,49 @@ export default function ProfilePage() {
                   <div className="text-xl sm:text-2xl font-bold text-primary">
                     {memes.length}
                   </div>
-                  <div className="text-xs sm:text-sm text-text-secondary">Active Memes</div>
+                  <div className="text-xs sm:text-sm text-text-secondary">
+                    Active Memes
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl sm:text-2xl font-bold text-primary">
                     {followStats.followersCount}
                   </div>
-                  <div className="text-xs sm:text-sm text-text-secondary">Followers</div>
+                  <div className="text-xs sm:text-sm text-text-secondary">
+                    Followers
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl sm:text-2xl font-bold text-primary">
                     {followStats.followingCount}
                   </div>
-                  <div className="text-xs sm:text-sm text-text-secondary">Following</div>
+                  <div className="text-xs sm:text-sm text-text-secondary">
+                    Following
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl sm:text-2xl font-bold text-primary">
                     {realTimeStats.totalLikes}
                   </div>
-                  <div className="text-xs sm:text-sm text-text-secondary">Likes</div>
+                  <div className="text-xs sm:text-sm text-text-secondary">
+                    Likes
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl sm:text-2xl font-bold text-primary">
                     {realTimeStats.totalComments}
                   </div>
-                  <div className="text-xs sm:text-sm text-text-secondary">Comments</div>
+                  <div className="text-xs sm:text-sm text-text-secondary">
+                    Comments
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl sm:text-2xl font-bold text-primary">
                     {realTimeStats.totalViews}
                   </div>
-                  <div className="text-xs sm:text-sm text-text-secondary">Views</div>
+                  <div className="text-xs sm:text-sm text-text-secondary">
+                    Views
+                  </div>
                 </div>
               </div>
 
@@ -299,7 +313,9 @@ export default function ProfilePage() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => router.push(`/profile/${profile.uid}/bookmarked`)}
+                onClick={() =>
+                  router.push(`/profile/${profile.uid}/bookmarked`)
+                }
                 className="flex items-center space-x-2 px-4 py-2 bg-card border border-primary/20 rounded-lg hover:border-primary/40 transition-colors"
               >
                 <span className="text-yellow-500">🔖</span>
@@ -339,6 +355,7 @@ export default function ProfilePage() {
                   <MemeCard
                     id={meme.id}
                     publicId={meme.publicId}
+                    imageUrl={meme.imageUrl || meme.publicId} // Use imageUrl if available, fallback to publicId
                     title={meme.title}
                     authorId={meme.authorId}
                     authorName={meme.authorName}
@@ -362,10 +379,6 @@ export default function ProfilePage() {
           )}
         </motion.div>
       </div>
-
-
-
-
     </motion.div>
   );
 }

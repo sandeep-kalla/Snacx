@@ -7,13 +7,15 @@ interface SplashScreenWrapperProps {
   children: React.ReactNode;
 }
 
-export default function SplashScreenWrapper({ children }: SplashScreenWrapperProps) {
+export default function SplashScreenWrapper({
+  children,
+}: SplashScreenWrapperProps) {
   const [showSplash, setShowSplash] = useState(true);
   const [hasShownSplash, setHasShownSplash] = useState(false);
 
   useEffect(() => {
     // Check if splash screen has been shown in this session
-    const splashShown = sessionStorage.getItem('snacx-splash-shown');
+    const splashShown = sessionStorage.getItem("snacx-splash-shown");
     if (splashShown) {
       setShowSplash(false);
       setHasShownSplash(true);
@@ -24,7 +26,7 @@ export default function SplashScreenWrapper({ children }: SplashScreenWrapperPro
     setShowSplash(false);
     setHasShownSplash(true);
     // Mark splash as shown for this session
-    sessionStorage.setItem('snacx-splash-shown', 'true');
+    sessionStorage.setItem("snacx-splash-shown", "true");
   };
 
   return (
@@ -32,7 +34,13 @@ export default function SplashScreenWrapper({ children }: SplashScreenWrapperPro
       {showSplash && !hasShownSplash && (
         <SplashScreen onComplete={handleSplashComplete} />
       )}
-      <div className={showSplash && !hasShownSplash ? "opacity-0" : "opacity-100 transition-opacity duration-500"}>
+      <div
+        className={
+          showSplash && !hasShownSplash
+            ? "opacity-0"
+            : "opacity-100 transition-opacity duration-500"
+        }
+      >
         {children}
       </div>
     </>

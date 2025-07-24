@@ -28,7 +28,7 @@ export default function ShareButton({
   memeTitle,
   memeImageUrl,
   authorName,
-  className = ""
+  className = "",
 }: ShareButtonProps) {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -41,10 +41,15 @@ export default function ShareButton({
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [sendingToChat, setSendingToChat] = useState(false);
-  const [activeTab, setActiveTab] = useState<'followers' | 'groups'>('followers');
+  const [activeTab, setActiveTab] = useState<"followers" | "groups">(
+    "followers"
+  );
 
   // Generate share URL and text
-  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/meme/${memeId}` : `/meme/${memeId}`;
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/meme/${memeId}`
+      : `/meme/${memeId}`;
   const shareText = `Check out this hilarious meme "${memeTitle}" by ${authorName} on Snacx! 😂`;
   const hashtags = "memes,funny,Snacx";
 
@@ -66,9 +71,11 @@ export default function ShareButton({
       const response = await fetch(memeImageUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `${memeTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_meme.jpg`;
+      link.download = `${memeTitle
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase()}_meme.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -93,7 +100,7 @@ export default function ShareButton({
         });
         setIsOpen(false);
       } catch (error) {
-        if (error instanceof Error && error.name !== 'AbortError') {
+        if (error instanceof Error && error.name !== "AbortError") {
           toast.error("Failed to share");
         }
       }
@@ -115,11 +122,10 @@ export default function ShareButton({
 
       // Load user's groups
       const chats = await ChatService.getUserChats(user.uid);
-      const groups = chats.filter(chat => chat.type === 'group');
+      const groups = chats.filter((chat) => chat.type === "group");
       setUserGroups(groups);
-
     } catch (error) {
-      console.error('Error loading followers and groups:', error);
+      console.error("Error loading followers and groups:", error);
     } finally {
       setIsSharing(false);
     }
@@ -127,23 +133,24 @@ export default function ShareButton({
 
   // Handle sending meme to selected users and groups
   const handleSendToChat = async () => {
-    if (!user || (selectedUsers.length === 0 && selectedGroups.length === 0)) return;
+    if (!user || (selectedUsers.length === 0 && selectedGroups.length === 0))
+      return;
 
     try {
       setSendingToChat(true);
       const userProfile = await UserService.getUserProfile(user.uid);
-      const userName = userProfile?.nickname || user.displayName || 'Anonymous';
+      const userName = userProfile?.nickname || user.displayName || "Anonymous";
 
       // Extract publicId from Cloudinary URL more reliably
       let publicId = null;
-      if (memeImageUrl.includes('cloudinary')) {
+      if (memeImageUrl.includes("cloudinary")) {
         // Handle different Cloudinary URL formats
-        const urlParts = memeImageUrl.split('/');
-        const uploadIndex = urlParts.findIndex(part => part === 'upload');
+        const urlParts = memeImageUrl.split("/");
+        const uploadIndex = urlParts.findIndex((part) => part === "upload");
         if (uploadIndex !== -1 && uploadIndex + 2 < urlParts.length) {
           // Get the part after version (v1234567890)
           const filenamePart = urlParts[uploadIndex + 2];
-          publicId = filenamePart.split('.')[0]; // Remove file extension
+          publicId = filenamePart.split(".")[0]; // Remove file extension
         }
       }
 
@@ -152,23 +159,33 @@ export default function ShareButton({
         title: memeTitle,
         imageUrl: memeImageUrl,
         authorName,
-        publicId
+        publicId,
       };
 
       // Send to each selected user (direct chats)
       for (const recipientId of selectedUsers) {
         // Create or get direct chat
         const chat = await ChatService.createDirectChat(user.uid, recipientId);
-        await ChatService.sendMemeMessage(chat.id, user.uid, userName, memeData);
+        await ChatService.sendMemeMessage(
+          chat.id,
+          user.uid,
+          userName,
+          memeData
+        );
       }
 
       // Send to each selected group
       for (const groupId of selectedGroups) {
-        await ChatService.sendMemeMessage(groupId, user.uid, userName, memeData);
+        await ChatService.sendMemeMessage(
+          groupId,
+          user.uid,
+          userName,
+          memeData
+        );
       }
 
       const totalRecipients = selectedUsers.length + selectedGroups.length;
-      const recipientText = totalRecipients === 1 ? 'recipient' : 'recipients';
+      const recipientText = totalRecipients === 1 ? "recipient" : "recipients";
       toast.success(`Meme shared with ${totalRecipients} ${recipientText}!`);
 
       setSelectedUsers([]);
@@ -176,8 +193,8 @@ export default function ShareButton({
       setShowChatShare(false);
       setIsOpen(false);
     } catch (error) {
-      console.error('Error sending meme to chat:', error);
-      toast.error('Failed to share meme');
+      console.error("Error sending meme to chat:", error);
+      toast.error("Failed to share meme");
     } finally {
       setSendingToChat(false);
     }
@@ -202,68 +219,81 @@ export default function ShareButton({
       icon: "🐦",
       color: "bg-blue-500 hover:bg-blue-600",
       action: () => {
-        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}&hashtags=${hashtags}`;
-        window.open(url, '_blank', 'width=600,height=400');
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+          shareText
+        )}&url=${encodeURIComponent(shareUrl)}&hashtags=${hashtags}`;
+        window.open(url, "_blank", "width=600,height=400");
         setIsOpen(false);
-      }
+      },
     },
     {
       name: "Facebook",
       icon: "📘",
       color: "bg-blue-600 hover:bg-blue-700",
       action: () => {
-        const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
-        window.open(url, '_blank', 'width=600,height=400');
+        const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+          shareUrl
+        )}&quote=${encodeURIComponent(shareText)}`;
+        window.open(url, "_blank", "width=600,height=400");
         setIsOpen(false);
-      }
+      },
     },
     {
       name: "WhatsApp",
       icon: "💬",
       color: "bg-green-500 hover:bg-green-600",
       action: () => {
-        const url = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
-        window.open(url, '_blank');
+        const url = `https://wa.me/?text=${encodeURIComponent(
+          `${shareText}\n${shareUrl}`
+        )}`;
+        window.open(url, "_blank");
         setIsOpen(false);
-      }
+      },
     },
     {
       name: "Instagram",
       icon: "📸",
-      color: "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
+      color:
+        "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
       action: () => {
         setShowInstagramOptions(true);
-      }
+      },
     },
     {
       name: "Reddit",
       icon: "🤖",
       color: "bg-orange-500 hover:bg-orange-600",
       action: () => {
-        const url = `https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareText)}`;
-        window.open(url, '_blank', 'width=600,height=400');
+        const url = `https://reddit.com/submit?url=${encodeURIComponent(
+          shareUrl
+        )}&title=${encodeURIComponent(shareText)}`;
+        window.open(url, "_blank", "width=600,height=400");
         setIsOpen(false);
-      }
+      },
     },
     {
       name: "Telegram",
       icon: "✈️",
       color: "bg-blue-400 hover:bg-blue-500",
       action: () => {
-        const url = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
-        window.open(url, '_blank');
+        const url = `https://t.me/share/url?url=${encodeURIComponent(
+          shareUrl
+        )}&text=${encodeURIComponent(shareText)}`;
+        window.open(url, "_blank");
         setIsOpen(false);
-      }
+      },
     },
     {
       name: "LinkedIn",
       icon: "💼",
       color: "bg-blue-700 hover:bg-blue-800",
       action: () => {
-        const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-        window.open(url, '_blank', 'width=600,height=400');
+        const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+          shareUrl
+        )}`;
+        window.open(url, "_blank", "width=600,height=400");
         setIsOpen(false);
-      }
+      },
     },
     {
       name: "Chat",
@@ -271,17 +301,17 @@ export default function ShareButton({
       color: "bg-purple-500 hover:bg-purple-600",
       action: () => {
         if (!user) {
-          toast.error('Please sign in to share to chat');
+          toast.error("Please sign in to share to chat");
           return;
         }
         // Reset selected users and groups when opening the modal
         setSelectedUsers([]);
         setSelectedGroups([]);
-        setActiveTab('followers');
+        setActiveTab("followers");
         setShowChatShare(true);
         loadFollowedUsers();
-      }
-    }
+      },
+    },
   ];
 
   return (
@@ -305,11 +335,11 @@ export default function ShareButton({
           viewBox="0 0 24 24"
           strokeWidth={2}
         >
-          <circle cx="18" cy="5" r="3"/>
-          <circle cx="6" cy="12" r="3"/>
-          <circle cx="18" cy="19" r="3"/>
-          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          <circle cx="18" cy="5" r="3" />
+          <circle cx="6" cy="12" r="3" />
+          <circle cx="18" cy="19" r="3" />
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
         </svg>
       </motion.button>
 
@@ -336,8 +366,12 @@ export default function ShareButton({
             >
               {/* Header */}
               <div className="p-4 border-b border-primary/10">
-                <h3 className="font-semibold text-foreground text-base">Share this meme</h3>
-                <p className="text-sm text-text-secondary mt-1 truncate">{memeTitle}</p>
+                <h3 className="font-semibold text-foreground text-base">
+                  Share this meme
+                </h3>
+                <p className="text-sm text-text-secondary mt-1 truncate">
+                  {memeTitle}
+                </p>
               </div>
 
               {/* Quick Actions */}
@@ -352,7 +386,7 @@ export default function ShareButton({
                   >
                     <span className="text-lg">📱</span>
                     <span className="text-sm font-medium text-foreground">
-                      {navigator.share ? 'Share' : 'Copy Link'}
+                      {navigator.share ? "Share" : "Copy Link"}
                     </span>
                   </motion.button>
 
@@ -366,7 +400,7 @@ export default function ShareButton({
                   >
                     <span className="text-lg">📥</span>
                     <span className="text-sm font-medium text-foreground">
-                      {isSharing ? 'Downloading...' : 'Download'}
+                      {isSharing ? "Downloading..." : "Download"}
                     </span>
                   </motion.button>
                 </div>
@@ -387,7 +421,9 @@ export default function ShareButton({
                       className={`flex flex-col items-center p-3 rounded-lg text-white transition-all duration-200 ${platform.color}`}
                     >
                       <span className="text-xl mb-1">{platform.icon}</span>
-                      <span className="text-xs font-medium">{platform.name}</span>
+                      <span className="text-xs font-medium">
+                        {platform.name}
+                      </span>
                     </motion.button>
                   ))}
                 </div>
@@ -402,7 +438,9 @@ export default function ShareButton({
                   className="w-full flex items-center justify-center space-x-2 p-3 bg-primary/10 hover:bg-primary/20 rounded-lg transition-all duration-200"
                 >
                   <span className="text-lg">📋</span>
-                  <span className="text-sm font-medium text-foreground">Copy Link</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Copy Link
+                  </span>
                 </motion.button>
               </div>
             </motion.div>
@@ -432,8 +470,12 @@ export default function ShareButton({
                   <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-2xl">📸</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Share to Instagram</h3>
-                  <p className="text-sm text-text-secondary">Choose where to share your meme</p>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Share to Instagram
+                  </h3>
+                  <p className="text-sm text-text-secondary">
+                    Choose where to share your meme
+                  </p>
                 </div>
 
                 <div className="space-y-3">
@@ -442,9 +484,15 @@ export default function ShareButton({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      window.open('https://www.instagram.com/stories/camera/', '_blank');
+                      window.open(
+                        "https://www.instagram.com/stories/camera/",
+                        "_blank"
+                      );
                       copyToClipboard();
-                      toast.success("Link copied! Paste it in your Instagram story", { duration: 4000 });
+                      toast.success(
+                        "Link copied! Paste it in your Instagram story",
+                        { duration: 4000 }
+                      );
                       setShowInstagramOptions(false);
                       setIsOpen(false);
                     }}
@@ -453,7 +501,9 @@ export default function ShareButton({
                     <span className="text-xl">📖</span>
                     <div className="text-left">
                       <p className="font-medium text-foreground">Story</p>
-                      <p className="text-xs text-text-secondary">Share to your Instagram story</p>
+                      <p className="text-xs text-text-secondary">
+                        Share to your Instagram story
+                      </p>
                     </div>
                   </motion.button>
 
@@ -462,9 +512,12 @@ export default function ShareButton({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      window.open('https://www.instagram.com/', '_blank');
+                      window.open("https://www.instagram.com/", "_blank");
                       copyToClipboard();
-                      toast.success("Link copied! Create a new post and paste the link", { duration: 4000 });
+                      toast.success(
+                        "Link copied! Create a new post and paste the link",
+                        { duration: 4000 }
+                      );
                       setShowInstagramOptions(false);
                       setIsOpen(false);
                     }}
@@ -473,7 +526,9 @@ export default function ShareButton({
                     <span className="text-xl">📷</span>
                     <div className="text-left">
                       <p className="font-medium text-foreground">Post</p>
-                      <p className="text-xs text-text-secondary">Share as a new Instagram post</p>
+                      <p className="text-xs text-text-secondary">
+                        Share as a new Instagram post
+                      </p>
                     </div>
                   </motion.button>
 
@@ -482,9 +537,15 @@ export default function ShareButton({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      window.open('https://www.instagram.com/direct/inbox/', '_blank');
+                      window.open(
+                        "https://www.instagram.com/direct/inbox/",
+                        "_blank"
+                      );
                       copyToClipboard();
-                      toast.success("Link copied! Paste it in your Instagram chat", { duration: 4000 });
+                      toast.success(
+                        "Link copied! Paste it in your Instagram chat",
+                        { duration: 4000 }
+                      );
                       setShowInstagramOptions(false);
                       setIsOpen(false);
                     }}
@@ -492,8 +553,12 @@ export default function ShareButton({
                   >
                     <span className="text-xl">💬</span>
                     <div className="text-left">
-                      <p className="font-medium text-foreground">Direct Message</p>
-                      <p className="text-xs text-text-secondary">Send in Instagram chat</p>
+                      <p className="font-medium text-foreground">
+                        Direct Message
+                      </p>
+                      <p className="text-xs text-text-secondary">
+                        Send in Instagram chat
+                      </p>
                     </div>
                   </motion.button>
                 </div>
@@ -540,7 +605,9 @@ export default function ShareButton({
               {/* Header */}
               <div className="p-4 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-foreground">Share</h3>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Share
+                  </h3>
                   <button
                     onClick={() => {
                       setShowChatShare(false);
@@ -550,8 +617,18 @@ export default function ShareButton({
                     }}
                     className="p-2 hover:bg-secondary rounded-lg transition-colors"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -561,21 +638,21 @@ export default function ShareButton({
               <div className="border-b border-border">
                 <div className="flex">
                   <button
-                    onClick={() => setActiveTab('followers')}
+                    onClick={() => setActiveTab("followers")}
                     className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                      activeTab === 'followers'
-                        ? 'text-primary border-b-2 border-primary bg-primary/5'
-                        : 'text-text-secondary hover:text-foreground'
+                      activeTab === "followers"
+                        ? "text-primary border-b-2 border-primary bg-primary/5"
+                        : "text-text-secondary hover:text-foreground"
                     }`}
                   >
                     Followers ({followedUsers.length})
                   </button>
                   <button
-                    onClick={() => setActiveTab('groups')}
+                    onClick={() => setActiveTab("groups")}
                     className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                      activeTab === 'groups'
-                        ? 'text-primary border-b-2 border-primary bg-primary/5'
-                        : 'text-text-secondary hover:text-foreground'
+                      activeTab === "groups"
+                        ? "text-primary border-b-2 border-primary bg-primary/5"
+                        : "text-text-secondary hover:text-foreground"
                     }`}
                   >
                     Groups ({userGroups.length})
@@ -586,12 +663,26 @@ export default function ShareButton({
               {/* Search */}
               <div className="p-4 border-b border-border">
                 <div className="relative">
-                  <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-text-secondary"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                   <input
                     type="text"
-                    placeholder={activeTab === 'followers' ? 'Search followers...' : 'Search groups...'}
+                    placeholder={
+                      activeTab === "followers"
+                        ? "Search followers..."
+                        : "Search groups..."
+                    }
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -608,22 +699,28 @@ export default function ShareButton({
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {activeTab === 'followers' ? (
+                    {activeTab === "followers" ? (
                       <>
                         {followedUsers
-                          .filter(user =>
-                            user.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
+                          .filter((user) =>
+                            user.nickname
+                              ?.toLowerCase()
+                              .includes(searchQuery.toLowerCase())
                           )
                           .map((follower) => {
-                            const isSelected = selectedUsers.includes(follower.uid);
-                            const avatarData = follower.avatar ? getAvatarById(follower.avatar) : null;
+                            const isSelected = selectedUsers.includes(
+                              follower.uid
+                            );
+                            const avatarData = follower.avatar
+                              ? getAvatarById(follower.avatar)
+                              : null;
                             return (
                               <div
                                 key={`follower-${follower.uid}`}
                                 className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
                                   isSelected
-                                    ? 'bg-primary/10'
-                                    : 'hover:bg-secondary/50'
+                                    ? "bg-primary/10"
+                                    : "hover:bg-secondary/50"
                                 }`}
                               >
                                 {/* Radio button */}
@@ -642,10 +739,12 @@ export default function ShareButton({
                                 {/* User info */}
                                 <div className="flex items-center space-x-3 flex-1">
                                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-lg">
-                                    {avatarData?.url || '👤'}
+                                    {avatarData?.url || "👤"}
                                   </div>
                                   <div className="flex-1">
-                                    <p className="font-medium text-foreground">{follower.nickname}</p>
+                                    <p className="font-medium text-foreground">
+                                      {follower.nickname}
+                                    </p>
                                   </div>
                                 </div>
                               </div>
@@ -654,26 +753,34 @@ export default function ShareButton({
 
                         {followedUsers.length === 0 && (
                           <div className="text-center py-8">
-                            <p className="text-text-secondary">No followers found</p>
-                            <p className="text-sm text-text-secondary mt-1">Follow some users to share memes with them!</p>
+                            <p className="text-text-secondary">
+                              No followers found
+                            </p>
+                            <p className="text-sm text-text-secondary mt-1">
+                              Follow some users to share memes with them!
+                            </p>
                           </div>
                         )}
                       </>
                     ) : (
                       <>
                         {userGroups
-                          .filter(group =>
-                            group.name?.toLowerCase().includes(searchQuery.toLowerCase())
+                          .filter((group) =>
+                            group.name
+                              ?.toLowerCase()
+                              .includes(searchQuery.toLowerCase())
                           )
                           .map((group) => {
-                            const isSelected = selectedGroups.includes(group.id);
+                            const isSelected = selectedGroups.includes(
+                              group.id
+                            );
                             return (
                               <div
                                 key={`group-${group.id}`}
                                 className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
                                   isSelected
-                                    ? 'bg-primary/10'
-                                    : 'hover:bg-secondary/50'
+                                    ? "bg-primary/10"
+                                    : "hover:bg-secondary/50"
                                 }`}
                               >
                                 {/* Radio button */}
@@ -692,7 +799,7 @@ export default function ShareButton({
                                 {/* Group info */}
                                 <div className="flex items-center space-x-3 flex-1">
                                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-lg overflow-hidden border border-primary/30">
-                                    {group.avatar?.startsWith('http') ? (
+                                    {group.avatar?.startsWith("http") ? (
                                       <img
                                         src={group.avatar}
                                         alt="Group avatar"
@@ -700,13 +807,18 @@ export default function ShareButton({
                                       />
                                     ) : (
                                       <span className="text-lg">
-                                        {getAvatarById(group.avatar || '👥')?.url || '👥'}
+                                        {getAvatarById(group.avatar || "👥")
+                                          ?.url || "👥"}
                                       </span>
                                     )}
                                   </div>
                                   <div className="flex-1">
-                                    <p className="font-medium text-foreground">{group.name || 'Group Chat'}</p>
-                                    <p className="text-xs text-text-secondary">{group.participants.length} members</p>
+                                    <p className="font-medium text-foreground">
+                                      {group.name || "Group Chat"}
+                                    </p>
+                                    <p className="text-xs text-text-secondary">
+                                      {group.participants.length} members
+                                    </p>
                                   </div>
                                 </div>
                               </div>
@@ -715,8 +827,12 @@ export default function ShareButton({
 
                         {userGroups.length === 0 && (
                           <div className="text-center py-8">
-                            <p className="text-text-secondary">No groups found</p>
-                            <p className="text-sm text-text-secondary mt-1">Create or join groups to share memes!</p>
+                            <p className="text-text-secondary">
+                              No groups found
+                            </p>
+                            <p className="text-sm text-text-secondary mt-1">
+                              Create or join groups to share memes!
+                            </p>
                           </div>
                         )}
                       </>
@@ -742,13 +858,25 @@ export default function ShareButton({
                       </div>
                     ) : (
                       (() => {
-                        const totalSelected = selectedUsers.length + selectedGroups.length;
-                        if (selectedUsers.length > 0 && selectedGroups.length > 0) {
-                          return `Send to ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''} & ${selectedGroups.length} group${selectedGroups.length > 1 ? 's' : ''}`;
+                        const totalSelected =
+                          selectedUsers.length + selectedGroups.length;
+                        if (
+                          selectedUsers.length > 0 &&
+                          selectedGroups.length > 0
+                        ) {
+                          return `Send to ${selectedUsers.length} user${
+                            selectedUsers.length > 1 ? "s" : ""
+                          } & ${selectedGroups.length} group${
+                            selectedGroups.length > 1 ? "s" : ""
+                          }`;
                         } else if (selectedUsers.length > 0) {
-                          return selectedUsers.length === 1 ? 'Send to 1 user' : `Send to ${selectedUsers.length} users`;
+                          return selectedUsers.length === 1
+                            ? "Send to 1 user"
+                            : `Send to ${selectedUsers.length} users`;
                         } else {
-                          return selectedGroups.length === 1 ? 'Send to 1 group' : `Send to ${selectedGroups.length} groups`;
+                          return selectedGroups.length === 1
+                            ? "Send to 1 group"
+                            : `Send to ${selectedGroups.length} groups`;
                         }
                       })()
                     )}

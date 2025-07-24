@@ -15,10 +15,14 @@ import SplashScreenWrapper from "./components/SplashScreenWrapper";
 const geistSans = GeistSans;
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001"
+  ),
   title: "Snacx - Share Your Funniest Memes",
-  description: "Upload, share, and discover the funniest memes with the community. Join Snacx today!",
-  keywords: "memes, funny, humor, share, upload, community, viral, jokes, snacx",
+  description:
+    "Upload, share, and discover the funniest memes with the community. Join Snacx today!",
+  keywords:
+    "memes, funny, humor, share, upload, community, viral, jokes, snacx",
   authors: [{ name: "Snacx Team" }],
   icons: {
     icon: "/snacc-logo.svg",
@@ -27,7 +31,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Snacx - Share Your Funniest Memes",
-    description: "Upload, share, and discover the funniest memes with the community. Join Snacx today!",
+    description:
+      "Upload, share, and discover the funniest memes with the community. Join Snacx today!",
     type: "website",
     locale: "en_US",
     siteName: "Snacx",
@@ -36,7 +41,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Snacx - Share Your Funniest Memes",
-    description: "Upload, share, and discover the funniest memes with the community. Join Snacx today!",
+    description:
+      "Upload, share, and discover the funniest memes with the community. Join Snacx today!",
     images: ["/snacc-logo.svg"],
   },
 };
@@ -77,7 +83,11 @@ export default function RootLayout({
                 <NotificationProvider>
                   <SplashScreenWrapper>
                     {/* Global Animated Background */}
-                    <AnimatedBackground variant="memes" intensity="medium" className="fixed inset-0 z-[1]" />
+                    <AnimatedBackground
+                      variant="memes"
+                      intensity="medium"
+                      className="fixed inset-0 z-[1]"
+                    />
                     <div className="relative z-[5]">
                       <Navbar />
                       <main className="relative z-[5]">{children}</main>
@@ -86,7 +96,8 @@ export default function RootLayout({
                     <Toaster
                       position="bottom-right"
                       toastOptions={{
-                        className: "bg-secondary text-text-primary border border-primary/20",
+                        className:
+                          "bg-secondary text-text-primary border border-primary/20",
                         style: {
                           background: "var(--color-secondary)",
                           color: "var(--color-text-primary)",
